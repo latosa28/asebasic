@@ -18,20 +18,21 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '18'  # Specifica la versione di Node.js, se necessario
+          node-version: '18'
 
       # 3. Installazione di Newman (CLI di Postman)
       - name: Install Newman
         run: npm install -g newman
 
-      # 4. Setup Docker
+      # 4. Setup Docker con rimozione di pacchetti in conflitto
       - name: Set up Docker
         run: |
           sudo apt-get update
-          sudo apt-get install docker.io
+          sudo apt-get remove -y containerd  # Rimuove il pacchetto in conflitto
+          sudo apt-get install -y docker.io
 
       # Passaggi per ciascun microservizio
-      # Esempio per microservizio "string"
+      # Esempio per microservizio "calc"
       - name: Build Docker Image for Calc Service
         run: docker build -t calc-service ./src/calc
 
@@ -44,6 +45,7 @@ jobs:
       - name: Stop Calc Service Container
         run: docker stop calc-container && docker rm calc-container
 
+      # Passaggi per il microservizio "string"
       - name: Build Docker Image for String Service
         run: docker build -t string-service ./src/string
 
@@ -55,9 +57,6 @@ jobs:
 
       - name: Stop String Service Container
         run: docker stop string-container && docker rm string-container
-
-      # Esegui questi passaggi per ciascun microservizio, sostituendo il nome del servizio e i file dei test di conseguenza.
-      # Ad esempio, ripeti i passaggi sopra per "calc", "dbm", "gateway", ecc.
 
       # 5. Costruzione delle immagini per tutti i servizi utilizzando docker-compose
       - name: Build All Microservices with Docker Compose
